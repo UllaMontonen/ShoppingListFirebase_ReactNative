@@ -1,14 +1,45 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Keyboard, Text, View, Button, TextInput, FlatList } from 'react-native';
+import { push, ref, onValue, remove } from 'firebase/database';
+import database from './firebase';
+
 
 export default function App() {
     // product input
     const [product, setProduct] = useState('');
     // amount input 
     const [amount, setAmount] = useState('');
-    // data is saved here
-    const [data, setData] = useState([]);
+    // items are saved here
+    const [items, setItems] = useState([]);
 
+
+    useEffect(() => {
+      const itemsRef = ref(database, '/items');
+      onValue(itemsRef, (snapshot) => {
+        const data = snapshot.val();
+        setItems(Object.values(data));
+      })
+    }, []);
+
+    // saving an item to shopping list
+    const saveItem = () => {
+      push(
+        ref(database, 'items/'),
+        { 'product': product, 'amount': amount });
+        Keyboard.dismiss();
+        setAmount('');
+        setProduct('');
+        console.log(items)
+    }
+    // deleting an item from a shopping list
+    // deleting is not currently working
+    const deleteItem = (key) => {
+      console.log('delete item: ', key);
+      remove (
+        ref(database, '/items/' + key),
+      )
+    }
 
 
   return (
@@ -28,13 +59,13 @@ export default function App() {
       </View>
       <Text style={styles.title}>Shopping List</Text>
       <FlatList style={styles.list}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={item => item.key }
           renderItem={({item}) => 
           <View style={styles.list}>
             <Text>{item.product}, {item.amount}</Text>
-            <Text style={styles.delete} onPress={() => deleteItem(item.id)}>  done</Text>
+            <Text style={styles.delete} onPress={() => deleteItem(item.key)}>  delete</Text>
           </View>}
-        data={data}
+        data={items}
       />
       <StatusBar style="auto" />
     </View>
@@ -66,7 +97,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   delete: {
-    color: "green",
+    color: "blue",
   },
   // iPhone button does not have bacground color
   button: {
