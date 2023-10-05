@@ -16,16 +16,17 @@ export default function App() {
 
     useEffect(() => {
       const itemsRef = ref(database, '/items');
-      onValue(itemsRef, (snapshot) => {
+      onValue(itemsRef, snapshot => {
         const data = snapshot.val();
-        setItems(Object.values(data));
+        const products = data ? Object.keys(data).map(key => ({key, ...data[key]})) : [];
+        setItems(products);
+        console.log(products.length, 'items read');
       })
     }, []);
 
     // saving an item to shopping list
     const saveItem = () => {
-      push(
-        ref(database, 'items/'),
+      push(ref(database, '/items'),
         { 'product': product, 'amount': amount });
         Keyboard.dismiss();
         setAmount('');
@@ -33,12 +34,9 @@ export default function App() {
         console.log(items)
     }
     // deleting an item from a shopping list
-    // deleting is not currently working
     const deleteItem = (key) => {
-      console.log('delete item: ', key);
-      remove (
-        ref(database, '/items/' + key),
-      )
+      console.log('delete item: ', key, items.find(item => item.key === key));
+      remove (ref(database, 'items/' + key));
     }
 
 
