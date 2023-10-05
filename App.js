@@ -4,6 +4,10 @@ import { StyleSheet, Keyboard, Text, View, Button, TextInput, FlatList } from 'r
 import { push, ref, onValue, remove } from 'firebase/database';
 import database from './firebase';
 
+// This is a shopping list app.
+// User can save the products and amounts they want to buy to the list. Flatlist is used to show the items.
+// When a user has bought the item, they can press the delete button and the product is removed from the list.
+// Firebase is used as a database.
 
 export default function App() {
     // product input
